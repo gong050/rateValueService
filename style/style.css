@@ -31,12 +31,37 @@ a:active {
     margin: 0 auto;
 }
 
+#rate {
+    width: 100%;
+}
+
+#search {
+    width: 70%;
+    margin: 0 auto;
+    padding: 0 0 20 20;
+}
+
+#chartContainer {
+    width: 70%;
+    height: 400px;
+    margin: 0 auto;
+}
+
+.search {
+    width: 90%;
+    height: 40px;
+    padding: 5px;
+    font-size: 16px;
+    border-radius: 5px;
+    border: 2px solid whitesmoke;
+}
+
 .block {
     float: left;
-    width: 40%;
+    width: 44%;
     margin: 10;
     padding: 5 5 5 20;
-    border: 5px black solid;
+
 }
 
 .hello {

@@ -1,4 +1,7 @@
 <?php
+
+// Функция findRate() отображает все курсы имеющиеся в БД в поля таблицы
+
 function findRate() {
     $rates = R::findAll( 'rate' );
     foreach ($rates as $rate) {
@@ -27,7 +30,7 @@ function loadCurrentRate() {
         $rate->charcode = (string)$valute->CharCode;
         $rate->nominal = (int)$valute->Nominal;
         $rate->name = (string)$valute->Name;
-        $rate->value = (int)$valute->Value;
+        $rate->value = (float)str_replace(",",".",$valute->Value);
         $rate->date = $currentDate;
         
         R::store($rate);
@@ -55,8 +58,8 @@ function loadRate($date) {
         $rate->charcode = (string)$valute->CharCode;
         $rate->nominal = (int)$valute->Nominal;
         $rate->name = (string)$valute->Name;
-        $rate->value = (int)$valute->Value;
-        $rate->date = $currentDate;
+        $rate->value = (float)str_replace(",",".",$valute->Value);
+        $rate->date = $date;
         
         R::store($rate);
     }
@@ -73,5 +76,53 @@ function updateRate() {
     if($result == NULL) {
         loadCurrentRate();
     }
+}
+
+/* 
+    Функция getLoadDate() производит захват данных с формы "Загрузить курсы по заданной дате".
+    Полученные данные преобразуются в формат d/m/Y для последующей передачи в функцию loadRate()
+*/ 
+
+function getLoadDate() {
+    $loadDate = strtotime($_GET['loadDate']);
+    $loadDate = date("d/m/Y", $loadDate);
+    loadRate($loadDate);
+}
+
+/* 
+    Функция getValuteName() делает запрос в БД для получения названий всех валют.
+    Полученные данные отоброжаются как элементы списка <select>.
+*/ 
+
+function getValuteName() {
+    $valuteName = R::getAll('SELECT DISTINCT name, uniquecode FROM rate');
+    for($i = 0; $i < count($valuteName); $i++) {
+        echo "<option value=".$valuteName[$i]['uniquecode'].">".$valuteName[$i]['name']."</option>";
+    }
+}
+
+function loadGraph() {
+
+    if(empty($_POST["valuteName"]) || empty($_POST["firstDate"]) || empty($_POST["secondDate"])) {
+        echo "Для построения графика, необоходимо заполнить все формы!";
+    }
+
+    $valuteName = $_POST["valuteName"];
+    $firstDate = strtotime($_POST["firstDate"]);
+    $firstDate = date("d/m/Y", $firstDate);
+    $secondDate = strtotime($_POST["secondDate"]);
+    $secondDate = date("d/m/Y", $secondDate);
+
+    return plotGraph($valuteName, $firstDate, $secondDate);
+}
+
+function plotGraph($valuteName, $firstDate, $secondDate) {
+    $url = "http://www.cbr.ru/scripts/XML_dynamic.asp?date_req1=".$firstDate."&date_req2=".$secondDate."&VAL_NM_RQ=".$valuteName;
+    $data = simplexml_load_file($url);
+    $dataPoints = array();
+    foreach ($data->children() as $points) {
+        array_push($dataPoints, array("y" => (float)str_replace(",",".",$points->Value), "label" => (string)$points['Date']));
+    }
+    return $dataPoints;
 }
 ?>
