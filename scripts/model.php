@@ -101,12 +101,9 @@ function getValuteName() {
     }
 }
 
+// Функция loadGraph() собирает данные с форм, преобразуя их к необходимому формату для дальнейшего построения графика
+
 function loadGraph() {
-
-    if(empty($_POST["valuteName"]) || empty($_POST["firstDate"]) || empty($_POST["secondDate"])) {
-        echo "Для построения графика, необоходимо заполнить все формы!";
-    }
-
     $valuteName = $_POST["valuteName"];
     $firstDate = strtotime($_POST["firstDate"]);
     $firstDate = date("d/m/Y", $firstDate);
@@ -115,6 +112,8 @@ function loadGraph() {
 
     return plotGraph($valuteName, $firstDate, $secondDate);
 }
+
+// Функция plotGraph отправляет данные на сайт ЦБ для получения динамики изменения курса. После чего создает массив точек по которым будет строиться график.
 
 function plotGraph($valuteName, $firstDate, $secondDate) {
     $url = "http://www.cbr.ru/scripts/XML_dynamic.asp?date_req1=".$firstDate."&date_req2=".$secondDate."&VAL_NM_RQ=".$valuteName;
